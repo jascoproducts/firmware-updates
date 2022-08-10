@@ -11,6 +11,7 @@ import {
 } from "./configSchema";
 import { conditionApplies } from "./Logic";
 import {
+	compareVersions,
 	DeviceID,
 	enumFilesRecursive,
 	FirmwareVersionRange,
@@ -68,8 +69,11 @@ export class ConditionalUpdateConfig implements IConfig {
 			upgrades: this.upgrades
 				.filter(
 					(upgrade) =>
-						upgrade.version !== deviceId.firmwareVersion &&
-						conditionApplies(upgrade, deviceId),
+						// Only return versions that are either an upgrade or a downgrade
+						compareVersions(
+							upgrade.version,
+							deviceId.firmwareVersion,
+						) !== 0 && conditionApplies(upgrade, deviceId),
 				)
 				.map(({ $if, ...upgrade }) => upgrade),
 		};
